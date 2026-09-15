@@ -1,2 +1,2 @@
-pip install -ir requirements.txt
+pip3 install -r requirements.txt
 fastapi run
