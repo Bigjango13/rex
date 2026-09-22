@@ -1,4 +1,3 @@
-// (ab)using http://infolab.stanford.edu/~ullman/fcdb/aut07/slides/ra.pdf
 #include <cassert>
 #include <cstdlib>
 #include <sstream>

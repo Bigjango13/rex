@@ -12,5 +12,34 @@ int main(int argc, char *argv[]) {
     input.open(argv[1]);
     Table tb{};
     tb.addFromCSV(input);
-    tb.print();
+
+    std::string line = "";
+    while (1) {
+        // Print table
+        tb.print();
+
+        // Get the next command
+        line = "";
+        while (line == "") {
+            std::cout << "> ";
+            if (!getline(std::cin, line)) {
+                // Ctrl-D / EOL
+                std::cout << std::endl;
+                line = "exit";
+                break;
+            }
+        }
+        // Exit command
+        if (line == "exit") break;
+
+        std::cout << "Running: '" << line << "'" << std::endl << std::endl;
+        std::vector<Token> tokens = lex(line);
+        for (const auto &t : tokens) {
+            t.print();
+            std::cout << ", ";
+        }
+        std::cout << std::endl;
+        //AST ast = parse(tokens);
+        //run(ast);
+    }
 }
