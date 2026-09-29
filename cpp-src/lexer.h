@@ -6,40 +6,40 @@
 // TODO: This doesn't work at all
 enum TokenType {
     // Objects
-    Number, // 1, 20, 1.2
-    Literal, // First Name
-    String, // "Kate"
+    Number = 0, // 1, 20, 1.2
+    Literal = 1, // First Name
+    String = 2, // "Kate"
 
     // Symbols
-    LParan,
-    RParan,
+    LParan = 3,
+    RParan = 4,
+    Equal = 5,
 
     // Operations
-    Selection, // σ, sigma
+    Selection = 6, // σ, sigma
     /*Projection, // π, pi
     Product, // Χ, chi
     Join, // ⋈, theta
     Rename, // ρ, rho
 
     // Set
-    Union, // ∪
-    Intersect, // ∩
+    Union = x, // ∪
+    Intersect = x, // ∩
 
     // Comparison
-    GreaterThan,
-    LessThan,
-    GreaterEq,
-    LessEq,*/
-    Equal,
-    //NotEqual,
+    GreaterThan = x,
+    LessThan = x,
+    GreaterEq = x,
+    LessEq = x,*/
+    //NotEqual = x,
 };
 
 // Stream
 struct Stream {
     const std::string &input;
     size_t index = 0;
-    char peek() const;
-    char eat();
+    std::string peek() const;
+    std::string eat();
 };
 
 // We store the stream location, data, and tt for each token
