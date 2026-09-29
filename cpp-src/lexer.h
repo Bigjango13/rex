@@ -3,8 +3,10 @@
 #include <string>
 #include <vector>
 
-// TODO: This doesn't work at all
-enum TokenType {
+enum class TokenType {
+    // Special
+    End = -1,
+
     // Objects
     Number = 0, // 1, 20, 1.2
     Literal = 1, // First Name
@@ -51,8 +53,16 @@ struct Token {
 
     Token(const Stream &s, char next, TokenType tt);
     Token(const Stream &s, TokenType tt);
+    static const Token &getError() {
+        static const Token error = Token(0, 0, "<END>", TokenType::End);
+        return error;
+    }
     void finish(const Stream &s);
     void print() const;
+
+private:
+    Token(size_t start, size_t end, std::string data, TokenType tt)
+        : start(start), end(end), data(data), tt(tt) {};
 };
 
 std::vector<Token> lex(const std::string &input);

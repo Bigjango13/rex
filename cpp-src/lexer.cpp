@@ -68,9 +68,8 @@ void Token::finish(const Stream &s) {
 }
 
 void Token::print() const {
-    std::cout << "Tok{tt: " << tt << ", data: \"" << data << "\"}";
+    std::cout << "Tok{tt: " << int(tt) << ", data: \"" << data << "\"}";
 }
-
 
 // Lexing
 std::vector<Token> lex(const std::string &input) {
