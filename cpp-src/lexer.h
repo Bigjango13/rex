@@ -8,32 +8,38 @@ enum class TokenType {
     End = -1,
 
     // Objects
-    Number = 0, // 1, 20, 1.2
-    Literal = 1, // First Name
-    String = 2, // "Kate"
+    Number, // 1, 20, 1.2
+    Literal, // First Name
+    String, // "Kate"
 
     // Symbols
-    LParan = 3,
-    RParan = 4,
-    Equal = 5,
+    LParan,
+    RParan,
+    LBrack,
+    RBrack,
+    Equal,
 
     // Operations
-    Selection = 6, // σ, sigma
-    /*Projection, // π, pi
+    Selection, // σ, sigma
+    Projection, // π, pi
     Product, // Χ, chi
     Join, // ⋈, theta
     Rename, // ρ, rho
 
     // Set
-    Union = x, // ∪
-    Intersect = x, // ∩
+    Union, // ∪
+    Intersect, // ∩
 
     // Comparison
-    GreaterThan = x,
-    LessThan = x,
-    GreaterEq = x,
-    LessEq = x,*/
-    //NotEqual = x,
+    GreaterThan, // >
+    LessThan, // <
+    Not, // !
+    GreaterEq, // >=
+    LessEq, // <=
+    NotEq, // !=
+
+    // Special
+    Underscore
 };
 
 // Stream
@@ -65,4 +71,4 @@ private:
         : start(start), end(end), data(data), tt(tt) {};
 };
 
-std::vector<Token> lex(const std::string &input);
+std::vector<Token> lex(const std::string &input, int &fail_index);

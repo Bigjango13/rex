@@ -132,6 +132,11 @@ public:
 };
 
 // Parser
+struct ParseError {
+    std::string error_msg;
+    Token token;
+};
+
 class Parser {
     size_t index = 0;
 
@@ -147,6 +152,9 @@ class Parser {
     }
 
 public:
+    std::vector<ParseError> errors = {};
+    void error(const std::string &msg, const Token &token);
+
     Node parse(Tokens tokens);
 
     // TODO: Table Assignment Expression 'Rn := <table_expr>'

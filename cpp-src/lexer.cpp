@@ -72,10 +72,20 @@ void Token::print() const {
 }
 
 // Lexing
-std::vector<Token> lex(const std::string &input) {
+#define SINGLE_CHAR_LEX(chr, tok) else if (next == chr) { \
+       Token nexttok(stream, tok); \
+       nexttok.data = next; \
+       stream.eat(); \
+       nexttok.finish(stream); \
+       ret.push_back(nexttok); \
+   }
+
+
+std::vector<Token> lex(const std::string &input, int &fail_index) {
     Stream stream{input};
     std::vector<Token> ret{};
 
+    fail_index = 0;
     std::string next = stream.peek();
     while (next != "") {
         if (isalpha(next)) {
@@ -162,42 +172,67 @@ std::vector<Token> lex(const std::string &input) {
             stream.eat();
             nexttok.finish(stream);
             ret.push_back(nexttok);
-        } else if (next == "(" || next == ")") {
-            // Parans
-            Token nexttok(
-                stream,
-                next == "(" ? TokenType::LParan : TokenType::RParan
-            );
+        } else if (next == ">") {
+            Token nexttok(stream, TokenType::GreaterThan);
             nexttok.data = next;
             stream.eat();
+            if (stream.peek() == "=") {
+                nexttok.tt = TokenType::GreaterEq;
+                nexttok.data += "=";
+                stream.eat();
+            }
             nexttok.finish(stream);
             ret.push_back(nexttok);
-        } else if (next == "=") {
-            // Equals
-            Token nexttok(stream, TokenType::Equal);
+        } else if (next == "<") {
+            Token nexttok(stream, TokenType::LessThan);
             nexttok.data = next;
             stream.eat();
+            if (stream.peek() == "=") {
+                nexttok.tt = TokenType::LessEq;
+                nexttok.data += "=";
+                stream.eat();
+            }
             nexttok.finish(stream);
             ret.push_back(nexttok);
-        } else if (next == "σ") {
-            // Select Symbol
-            Token nexttok(stream, TokenType::Selection);
+        } else if (next == "!") {
+            Token nexttok(stream, TokenType::Not);
             nexttok.data = next;
             stream.eat();
+            if (stream.peek() == "=") {
+                nexttok.tt = TokenType::NotEq;
+                nexttok.data += "=";
+                stream.eat();
+            }
             nexttok.finish(stream);
             ret.push_back(nexttok);
-        } else if (iswhitespace(next)) {
+        }
+        SINGLE_CHAR_LEX("(", TokenType::LParan)
+        SINGLE_CHAR_LEX(")", TokenType::RParan)
+        SINGLE_CHAR_LEX("{", TokenType::LBrack)
+        SINGLE_CHAR_LEX("}", TokenType::RBrack)
+        SINGLE_CHAR_LEX("_", TokenType::Underscore)
+        SINGLE_CHAR_LEX("=", TokenType::Equal)
+        SINGLE_CHAR_LEX("σ", TokenType::Selection)
+        // TODO: Keywords for all of these
+        SINGLE_CHAR_LEX("π", TokenType::Projection)
+        SINGLE_CHAR_LEX("Χ", TokenType::Product)
+        SINGLE_CHAR_LEX("⋈", TokenType::Join)
+        SINGLE_CHAR_LEX("ρ", TokenType::Rename)
+        SINGLE_CHAR_LEX("∪", TokenType::Union)
+        SINGLE_CHAR_LEX("∩", TokenType::Intersect)
+        else if (iswhitespace(next)) {
             // Skip whitespace
             stream.eat();
         } else {
-            std::cout << "Failed to lex: '" << next << "'" << std::endl;
+            std::cout << "Error: Failed to lex '" << next << "'" << std::endl;
             return {};
         }
-#if 1 // Debug
+#if 0 // Debug
         std::cout << "Added: ";
         ret.back().print();
         std::cout << std::endl;
 #endif
+        fail_index = stream.index;
         next = stream.peek();
     }
     return ret;
