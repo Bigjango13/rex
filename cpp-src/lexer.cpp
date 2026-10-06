@@ -91,10 +91,12 @@ std::vector<Token> lex(const std::string &input, int &fail_index) {
         if (isalpha(next)) {
             // Literal/keyword
             Token nexttok(stream, TokenType::Literal);
+            bool space = false;
             do {
                 nexttok.data += stream.eat();
+                space = next == " ";
                 next = stream.peek();
-            } while (islitchar(next));
+            } while (!space ? islitchar(next) : isalpha(next));
             nexttok.finish(stream);
 
             // Remove trailing whitespace
@@ -212,6 +214,12 @@ std::vector<Token> lex(const std::string &input, int &fail_index) {
         SINGLE_CHAR_LEX("}", TokenType::RBrack)
         SINGLE_CHAR_LEX("_", TokenType::Underscore)
         SINGLE_CHAR_LEX("=", TokenType::Equal)
+        SINGLE_CHAR_LEX("+", TokenType::Plus)
+        SINGLE_CHAR_LEX("-", TokenType::Minus)
+        SINGLE_CHAR_LEX("*", TokenType::Times)
+        SINGLE_CHAR_LEX("/", TokenType::Div)
+        SINGLE_CHAR_LEX("&", TokenType::And)
+        SINGLE_CHAR_LEX("|", TokenType::Or)
         SINGLE_CHAR_LEX("σ", TokenType::Selection)
         // TODO: Keywords for all of these
         SINGLE_CHAR_LEX("π", TokenType::Projection)

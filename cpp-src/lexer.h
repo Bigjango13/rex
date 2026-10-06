@@ -17,7 +17,6 @@ enum class TokenType {
     RParan,
     LBrack,
     RBrack,
-    Equal,
 
     // Operations
     Selection, // σ, sigma
@@ -34,9 +33,18 @@ enum class TokenType {
     GreaterThan, // >
     LessThan, // <
     Not, // !
+    Equal, // =
     GreaterEq, // >=
     LessEq, // <=
     NotEq, // !=
+
+    // Binops
+    Plus, // +
+    Minus, // -
+    Times, // *
+    Div, // /
+    And, // &
+    Or, // |
 
     // Special
     Underscore

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 
 #include "parser.h"
@@ -62,20 +63,123 @@ Node Parser::parse_base_expr(Tokens tokens) {
     return nullptr;
 }
 
-Node Parser::parse_binop_expr(Tokens tokens) {
-    Node lhs = this->parse_base_expr(tokens);
-    ERR(lhs);
-    const Token &at = this->peek(tokens);
-    // Binop
-    if (at.tt == TokenType::Equal /*|| ...*/) {
-        this->eat(tokens);
-        Node rhs = this->parse_base_expr(tokens);
-        ERR(rhs);
-        // TODO: Beyond `TokenType::Equal`
-        return NODE<BinopNode>(MOVE(lhs), MOVE(rhs), BinopType::Equals);
+
+// Lookup from TokenType to corresponding BinopType
+// Returns BinopType::None when it fails
+BinopType binop_from_token(TokenType tt) {
+    switch (tt) {
+        case TokenType::Plus:
+            return BinopType::Plus;
+        case TokenType::Minus:
+            return BinopType::Minus;
+
+        case TokenType::Times:
+            return BinopType::Times;
+        case TokenType::Div:
+            return BinopType::Div;
+
+        case TokenType::And:
+            return BinopType::And;
+        case TokenType::Or:
+            return BinopType::Or;
+
+        case TokenType::GreaterThan:
+            return BinopType::GreaterThan;
+        case TokenType::LessThan:
+            return BinopType::LessThan;
+        case TokenType::Equal:
+            return BinopType::Equal;
+        case TokenType::GreaterEq:
+            return BinopType::GreaterEq;
+        case TokenType::LessEq:
+            return BinopType::LessEq;
+        case TokenType::NotEq:
+            return BinopType::NotEq;
+
+        default:
+            return BinopType::None;
     }
-    // Not a binop!
-    return lhs;
+}
+
+// Helper for the binops that does parsing respectful to precedence
+Node Parser::parse_binop_helper(
+    Tokens tokens, std::vector<BinopType> ops,
+    BinopCallback_t callback,
+    bool can_repeat, bool can_repeat_diff
+) {
+    Node ret = (*this.*callback)(tokens);
+    ERR(ret);
+    BinopType last = BinopType::None;
+    while (1) {
+        Token op = this->peek(tokens);
+        BinopType binop = binop_from_token(op.tt);
+        if (binop == BinopType::None) return ret;
+        // Check if the op can be used
+        if (std::find(ops.begin(), ops.end(), binop) == ops.end()) {
+            // Can't be used
+            return ret;
+        }
+        if (!can_repeat_diff && last != BinopType::None && last != binop) {
+            // Invalid repeat
+            error(
+                "Cannot repeat this operator with a different operator"
+                " of same precedence, please use parentheses",
+                op
+            );
+            // Continue lexing as to not cause cascading errors
+        }
+        // Eat
+        this->eat(tokens);
+        Node rhs = (*this.*callback)(tokens);
+        ERR(rhs);
+        ret = NODE<BinopNode>(MOVE(ret), MOVE(rhs), binop);
+        if (!can_repeat) {
+            // No repeats
+            return ret;
+        }
+        last = binop;
+    }
+    return ret;
+}
+
+Node Parser::parse_binop_math2(Tokens tokens) {
+    // Parse * and /
+    return parse_binop_helper(
+        tokens, {BinopType::Times, BinopType::Div},
+        &Parser::parse_base_expr
+    );
+}
+Node Parser::parse_binop_math1(Tokens tokens) {
+    // Parse + and -
+    return parse_binop_helper(
+        tokens, {BinopType::Plus, BinopType::Minus},
+        &Parser::parse_binop_math2
+    );
+}
+Node Parser::parse_binop_cmp(Tokens tokens) {
+    // Parse >, <, =, >=, <=, and !=
+    return parse_binop_helper(
+        tokens, {
+            BinopType::GreaterThan,
+            BinopType::LessThan,
+            BinopType::Equal,
+            BinopType::GreaterEq,
+            BinopType::LessEq,
+            BinopType::NotEq,
+        }, &Parser::parse_binop_math1,
+        false
+    );
+}
+Node Parser::parse_binop_logic(Tokens tokens) {
+    // Parse & and |
+    return parse_binop_helper(
+        tokens, {BinopType::And, BinopType::Or},
+        &Parser::parse_binop_cmp,
+        true, false
+    );
+}
+Node Parser::parse_binop_expr(Tokens tokens) {
+    return this->parse_binop_logic(tokens);
 }
 
 Node Parser::parse_tl_expr(Tokens tokens) {
@@ -108,5 +212,7 @@ Node Parser::parse_table_expr(Tokens tokens) {
 Node Parser::parse(Tokens tokens) {
     // Top level parse
     errors.clear();
-    return this->parse_table_expr(tokens);
+    Node ret = this->parse_table_expr(tokens);
+    if (errors.size() != 0) return nullptr;
+    return ret;
 }

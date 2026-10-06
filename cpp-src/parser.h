@@ -14,8 +14,24 @@ typedef std::unique_ptr<ASTNode> Node;
 
 // We can specilize binary operations into their one classes/types if needs be
 enum class BinopType {
-    // Equals(lhs: T, rhs: T): Bool
-    Equals
+    // None
+    None,
+
+    // Equals
+    GreaterThan,
+    LessThan,
+    Equal,
+    GreaterEq,
+    LessEq,
+    NotEq,
+
+    // Binops
+    Plus,
+    Minus,
+    Times,
+    Div,
+    And,
+    Or
 };
 
 enum class ASTNodeType {
@@ -77,6 +93,10 @@ public:
 };
 
 class BinopNode : public ASTNode {
+    static constexpr const char *optable[] = {
+        "?", ">", "<", "=", ">=", "<=", "!=",
+        "+", "-", "*", "/", "&", "|"
+    };
 public:
     Node lhs;
     Node rhs;
@@ -90,9 +110,10 @@ public:
     {}
 
     void print() override {
-        std::cout << "BinopNode(";
+        std::cout << "(";
+        std::cout << optable[int(binop_type)] << " ";
         lhs->print();
-        std::cout << " {" << int(binop_type) << "} ";
+        std::cout << " ";
         rhs->print();
         std::cout << ")";
     }
@@ -167,6 +188,17 @@ public:
     Node parse_tl_expr(Tokens tokens);
 
     // Binop 'a @ b'
+    typedef Node (Parser::*BinopCallback_t)(Tokens tokens);
+    Node parse_binop_helper(
+        Tokens tokens, std::vector<BinopType> ops,
+        BinopCallback_t callback,
+        bool can_repeat = true,
+        bool can_repeat_diff = true
+    );
+    Node parse_binop_math2(Tokens tokens);
+    Node parse_binop_math1(Tokens tokens);
+    Node parse_binop_cmp(Tokens tokens);
+    Node parse_binop_logic(Tokens tokens);
     Node parse_binop_expr(Tokens tokens);
 
     // Base Express (lit, num, str)
