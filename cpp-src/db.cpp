@@ -17,7 +17,7 @@ void Table::addRow(std::vector<Record> rowvals) {
     assert(rowvals.size() == columns.size());
     for (size_t i = 0; i < columns.size(); i++) {
         // TODO: Type checking?
-        //assert(columns[i].is_str == rowvals[i].is_str);
+        //assert(columns[i].type == rowvals[i].type);
         columns[i].records.push_back(rowvals[i]);
         columns[i].max_align = std::max(
             columns[i].max_align,
@@ -48,6 +48,10 @@ void Table::addFromCSV(std::istream &stream) {
 }
 
 void Table::print() {
+    // Name
+    if (this->name != "") {
+        std::cout << "Table: " << this->name << std::endl;
+    }
     // Print headers
     for (auto &col : columns) {
         col.update_max_align();
@@ -84,41 +88,56 @@ void Column::update_max_align() {
 }
 
 // Record
-Record::Record(std::string data) : sdata(data), is_str(true) {
+Record::Record(std::string data) : sdata(data), type('s') {
     char *end = NULL;
     double val = strtod(this->sdata.c_str(), &end);
     if (end != this->sdata.c_str() && *end == '\0' && val != HUGE_VAL) {
-        this->is_str = false;
+        this->type = 'f';
         this->fdata = val;
+    } else if (data == "true" || data == "false") {
+        this->type = 'b';
+        this->bval = data == "true";
     }
 }
 
-Record::Record(double data) : fdata(data), is_str(false) {
+Record::Record(double data) : sdata(""), fdata(data), type('f') {
 }
 
-Record::Record(bool str) : sdata(""), fdata(0.0), is_str(str) {
+Record::Record(bool val) : sdata(""), bval(val), type('b') {
 }
 
 // TODO: Where do we handle type errors?
 // Do we even handle type errors or do
 // some gross JS-like type coercion?
 double Record::getDoubleValue() {
-    if (!is_str) return fdata;
+    if (type == 'f') return fdata;
     return 0;
 }
 
 void Record::setDoubleValue(double val) {
-    // TODO: See prev todo
-    if (!is_str) fdata = val;
+    type = 'f';
+    fdata = val;
 }
 
 std::string Record::getStringValue() {
-    if (is_str) return sdata;
+    if (type == 's') return sdata;
+    if (type == 'b') return bval ? "true" : "false";
     // Convert the double to a string
     return std::format("{}", fdata);
 }
 
 void Record::setStringValue(std::string val) {
-    // TODO: See prev todo
-    if (is_str) sdata = val;
+    type = 's';
+    sdata = val;
+}
+
+bool Record::getBooleanValue() {
+    if (type == 's') return sdata == "";
+    if (type == 'f') return fdata != 0.0;
+    return bval;
+}
+
+void Record::setBooleanValue(bool val) {
+    type = 'b';
+    bval = val;
 }

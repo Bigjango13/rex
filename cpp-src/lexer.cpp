@@ -80,6 +80,9 @@ void Token::print() const {
        ret.push_back(nexttok); \
    }
 
+bool iskw(const std::string &ident) {
+    return ident == "select";
+}
 
 std::vector<Token> lex(const std::string &input, int &fail_index) {
     Stream stream{input};
@@ -96,6 +99,7 @@ std::vector<Token> lex(const std::string &input, int &fail_index) {
                 nexttok.data += stream.eat();
                 space = next == " ";
                 next = stream.peek();
+                if (next == " " && iskw(nexttok.data)) break;
             } while (!space ? islitchar(next) : isalpha(next));
             nexttok.finish(stream);
 

@@ -1,6 +1,7 @@
 #include "db.h"
 #include "lexer.h"
 #include "parser.h"
+#include "engine.h"
 
 static void report_error(const std::string &line, size_t offset, size_t len) {
     std::cout << "| " << line << std::endl;
@@ -10,20 +11,22 @@ static void report_error(const std::string &line, size_t offset, size_t len) {
 
 // Temp hack for testing
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        std::cout << "Usage: " << argv[0] << " input.csv" << std::endl;
+    if (argc != 3) {
+        std::cout << "Usage: " << argv[0] << " TableName input.csv" << std::endl;
         return 1;
     }
 
     std::ifstream input;
-    input.open(argv[1]);
-    Table tb{};
-    tb.addFromCSV(input);
+    input.open(argv[2]);
+    Table *tb = new Table(argv[1]);
+    tb->addFromCSV(input);
+    Engine engine;
+    engine.tables[tb->name] = tb;
 
     std::string line = "";
     while (1) {
         // Print table
-        tb.print();
+        engine.print();
 
         // Get the next command
         line = "";
@@ -85,6 +88,12 @@ int main(int argc, char *argv[]) {
         std::cout << std::endl;
 
         // Run
-        //run(ast);
+        if (!engine.run_node(ast.get(), true)) {
+            std::cout << "Failed to run!" << std::endl;
+            for (EngineError &err : engine.errors) {
+                std::cout << "Runtime Error: " << err.msg << std::endl;
+            }
+            continue;
+        }
     }
 }
