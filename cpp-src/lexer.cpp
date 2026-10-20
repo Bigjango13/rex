@@ -6,7 +6,7 @@
 
 // UTF8 support
 typedef unsigned char uchar;
-int get_char_len(char c_) {
+static int get_char_len(char c_) {
     uchar c = (uchar) c_;
     // 0yyyzzzz
     if ((c & 0x80) == 0x00) return 1;
@@ -20,7 +20,7 @@ int get_char_len(char c_) {
 }
 
 // Hacky UTF support
-std::string read_utf8_char(const std::string &str, size_t index) {
+static std::string read_utf8_char(const std::string &str, size_t index) {
     int len = get_char_len(str[index]);
     return str.substr(index, len);
 }
@@ -38,20 +38,20 @@ std::string Stream::eat() {
 }
 
 // Char tests
-inline constexpr bool isalpha(const std::string &c) {
+static inline constexpr bool isalpha(const std::string &c) {
     return c.size() == 1 &&
         (('a' <= c[0] && c[0] <= 'z') || ('A' <= c[0] && c[0] <= 'Z'));
 }
-inline constexpr bool isnum(const std::string &c) {
+static inline constexpr bool isnum(const std::string &c) {
     return c.size() == 1 && '0' <= c[0] && c[0] <= '9';
 }
-inline constexpr bool isalphanum(const std::string &c) {
+static inline constexpr bool isalphanum(const std::string &c) {
     return isalpha(c) || isnum(c);
 }
-inline constexpr bool islitchar(const std::string &c) {
+static inline constexpr bool islitchar(const std::string &c) {
     return isalpha(c) || isnum(c) || (c.size() == 1 && c[0] == ' ');
 }
-inline constexpr bool iswhitespace(const std::string &c) {
+static inline constexpr bool iswhitespace(const std::string &c) {
     return c.size() == 1 && (c[0] == ' ' || c[0] == '\n' || c[0] == '\t');
 }
 
@@ -80,7 +80,7 @@ void Token::print() const {
        ret.push_back(nexttok); \
    }
 
-bool iskw(const std::string &ident) {
+static inline bool iskw(const std::string &ident) {
     return ident == "select";
 }
 

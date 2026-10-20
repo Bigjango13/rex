@@ -9,7 +9,7 @@ static void report_error(const std::string &line, size_t offset, size_t len) {
     std::cout << std::string(len, '^') << " Here";
 }
 
-// Temp hack for testing
+#ifndef WEBSITE
 int main(int argc, char *argv[]) {
     if (argc != 3) {
         std::cout << "Usage: " << argv[0] << " TableName input.csv" << std::endl;
@@ -97,3 +97,4 @@ int main(int argc, char *argv[]) {
         }
     }
 }
+#endif

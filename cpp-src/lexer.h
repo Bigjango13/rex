@@ -8,9 +8,9 @@ enum class TokenType {
     End = -1,
 
     // Objects
-    Number, // 1, 20, 1.2
+    Number,  // 1, 20, 1.2
     Literal, // First Name
-    String, // "Kate"
+    String,  // "Kate"
 
     // Symbols
     LParan,
@@ -19,32 +19,32 @@ enum class TokenType {
     RBrack,
 
     // Operations
-    Selection, // σ, sigma
+    Selection,  // σ, sigma
     Projection, // π, pi
-    Product, // Χ, chi
-    Join, // ⋈, theta
-    Rename, // ρ, rho
+    Product,    // Χ, chi
+    Join,       // ⋈, theta
+    Rename,     // ρ, rho
 
     // Set
-    Union, // ∪
+    Union,     // ∪
     Intersect, // ∩
 
     // Comparison
     GreaterThan, // >
-    LessThan, // <
-    Not, // !
-    Equal, // =
-    GreaterEq, // >=
-    LessEq, // <=
-    NotEq, // !=
+    LessThan,    // <
+    Not,         // !
+    Equal,       // =
+    GreaterEq,   // >=
+    LessEq,      // <=
+    NotEq,       // !=
 
     // Binops
-    Plus, // +
+    Plus,  // +
     Minus, // -
     Times, // *
-    Div, // /
-    And, // &
-    Or, // |
+    Div,   // /
+    And,   // &
+    Or,    // |
 
     // Special
     Underscore
