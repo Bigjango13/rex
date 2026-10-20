@@ -9,7 +9,30 @@
 
 // Table
 void Table::addCol(std::string name) {
-    columns.push_back(Column(name));
+    // Check for dup names
+    bool changed = true;
+    int n = 1;
+    std::string testing = name + "1";
+    while (changed) {
+        changed = false;
+        for (auto &col : columns) {
+            if (n == 1 && col.name == name) {
+                col.name = testing;
+                n += 1;
+                testing = name + std::to_string(n);
+                changed = true;
+            } else if (col.name == testing) {
+                n += 1;
+                testing = name + std::to_string(n);
+                changed = true;
+            }
+        }
+    }
+    if (n == 1) {
+        columns.push_back(Column(name));
+    } else {
+        columns.push_back(Column(testing));
+    }
 }
 
 void Table::addRow(std::vector<Record> rowvals) {
