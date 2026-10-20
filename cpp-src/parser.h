@@ -41,6 +41,8 @@ enum class ASTNodeType {
     // Table Ops
     // Select(tbl: Table, cond: Bool): Table
     SelectTable,
+    // Project(tbl: Table, attrs: ("A", Expr)[]): Table
+    ProjectTable,
 
     // Joint exprs
     // Binop(lhs: Expr, op: BinopType, rhs: Expr): Expr
@@ -89,6 +91,39 @@ public:
         std::cout << ", ";
         criterion->print();
         std::cout << ")";
+    }
+};
+
+struct ProjectionAttr {
+    Node expr;
+    std::string name;
+
+    void print() const {
+        expr->print();
+        std::cout << " -> " << name;
+    }
+};
+
+class ProjectionTableNode : public ASTNode {
+public:
+    Node table;
+    std::vector<ProjectionAttr> attributes;
+
+    ProjectionTableNode(Node table, std::vector<ProjectionAttr> attributes) :
+        ASTNode(ASTNodeType::ProjectTable),
+        table(MOVE(table)),
+        attributes(MOVE(attributes))
+    {}
+
+    void print() override {
+        std::cout << "ProjectionTableNode(";
+        table->print();
+        std::cout << ", [";
+        for (size_t n = 0; n < attributes.size(); n++) {
+            attributes[n].print();
+            if (n != attributes.size() - 1) std::cout << ", ";
+        }
+        std::cout << "])";
     }
 };
 

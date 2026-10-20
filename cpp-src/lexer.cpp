@@ -81,7 +81,7 @@ void Token::print() const {
    }
 
 static inline bool iskw(const std::string &ident) {
-    return ident == "select";
+    return ident == "select" || ident == "project";
 }
 
 std::vector<Token> lex(const std::string &input, int &fail_index) {
@@ -110,6 +110,7 @@ std::vector<Token> lex(const std::string &input, int &fail_index) {
 
             // Check if it's a keyword
             if (nexttok.data == "select") nexttok.tt = TokenType::Selection;
+            if (nexttok.data == "project") nexttok.tt = TokenType::Projection;
             ret.push_back(nexttok);
         } else if (isnum(next) || next == ".") {
             // This intentionally doesn't handle negatives!
@@ -211,22 +212,35 @@ std::vector<Token> lex(const std::string &input, int &fail_index) {
             }
             nexttok.finish(stream);
             ret.push_back(nexttok);
+        } else if (next == "-") {
+            Token nexttok(stream, TokenType::Minus);
+            nexttok.data = next;
+            stream.eat();
+            if (stream.peek() == ">") {
+                nexttok.tt = TokenType::ElmProject;
+                nexttok.data += ">";
+                stream.eat();
+            }
+            nexttok.finish(stream);
+            ret.push_back(nexttok);
         }
+        SINGLE_CHAR_LEX(",", TokenType::Comma)
         SINGLE_CHAR_LEX("(", TokenType::LParan)
         SINGLE_CHAR_LEX(")", TokenType::RParan)
-        SINGLE_CHAR_LEX("{", TokenType::LBrack)
-        SINGLE_CHAR_LEX("}", TokenType::RBrack)
+        SINGLE_CHAR_LEX("[", TokenType::LBrack)
+        SINGLE_CHAR_LEX("]", TokenType::RBrack)
+        SINGLE_CHAR_LEX("{", TokenType::LBrace)
+        SINGLE_CHAR_LEX("}", TokenType::RBrace)
         SINGLE_CHAR_LEX("_", TokenType::Underscore)
         SINGLE_CHAR_LEX("=", TokenType::Equal)
         SINGLE_CHAR_LEX("+", TokenType::Plus)
-        SINGLE_CHAR_LEX("-", TokenType::Minus)
         SINGLE_CHAR_LEX("*", TokenType::Times)
         SINGLE_CHAR_LEX("/", TokenType::Div)
         SINGLE_CHAR_LEX("&", TokenType::And)
         SINGLE_CHAR_LEX("|", TokenType::Or)
         SINGLE_CHAR_LEX("σ", TokenType::Selection)
-        // TODO: Keywords for all of these
         SINGLE_CHAR_LEX("π", TokenType::Projection)
+        // TODO: Keywords for all of these
         SINGLE_CHAR_LEX("Χ", TokenType::Product)
         SINGLE_CHAR_LEX("⋈", TokenType::Join)
         SINGLE_CHAR_LEX("ρ", TokenType::Rename)

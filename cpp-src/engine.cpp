@@ -10,6 +10,14 @@ bool Engine::eval_binop_expr(Table *target, Record &val, BinopNode *node) {
     // Eval sides
     // Left
     ERR(eval_expr(target, val, node->lhs.get()));
+
+    // Short circuiting
+    if (node->binop_type == BinopType::And) {
+        if (val.getBooleanValue() == false) return true;
+    } else if (node->binop_type == BinopType::Or) {
+        if (val.getBooleanValue() == true) return true;
+    }
+
     // Right
     Record other(false);
     ERR(eval_expr(target, other, node->rhs.get()));
@@ -57,12 +65,10 @@ bool Engine::eval_binop_expr(Table *target, Record &val, BinopNode *node) {
             }
             return true;
 
-        // TODO: Short circuiting
+        // Short circuting behavior is handled earlier
         case BinopType::And:
-            val = Record(val.getDoubleValue() && other.getDoubleValue());
-            return true;
         case BinopType::Or:
-            val = Record(val.getDoubleValue() || other.getDoubleValue());
+            val = other;
             return true;
         default:
             error("Invalid binop: " + std::to_string((int) node->binop_type));

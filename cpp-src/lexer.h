@@ -13,10 +13,12 @@ enum class TokenType {
     String,  // "Kate"
 
     // Symbols
-    LParan,
-    RParan,
-    LBrack,
-    RBrack,
+    LParan, // (
+    RParan, // )
+    LBrack, // [
+    RBrack, // ]
+    LBrace, // {
+    RBrace, // }
 
     // Operations
     Selection,  // σ, sigma
@@ -47,7 +49,9 @@ enum class TokenType {
     Or,    // |
 
     // Special
-    Underscore
+    Underscore, // _
+    ElmProject, // ->
+    Comma, // ,
 };
 
 // Stream

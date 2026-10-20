@@ -20,10 +20,10 @@ void Parser::error(const std::string &msg, const Token &token) {
 
 Node Parser::parse_base_expr(Tokens tokens) {
     const Token &at = this->peek(tokens);
-    if (at.tt == TokenType::LParan || at.tt == TokenType::LBrack) {
+    if (at.tt == TokenType::LParan || at.tt == TokenType::LBrace) {
         TokenType closing = at.tt == TokenType::LParan
             ? TokenType::RParan
-            : TokenType::RBrack;
+            : TokenType::RBrace;
         this->eat(tokens);
         Node ret = this->parse_tl_expr(tokens);
         if (this->peek(tokens).tt == closing) {
@@ -202,6 +202,60 @@ Node Parser::parse_table_expr(Tokens tokens) {
         ERR(table);
         // Selection
         return NODE<SelectTableNode>(MOVE(table), MOVE(expr));
+    } else if (at.tt == TokenType::Projection) {
+        // Parse projection
+        this->eat(tokens);
+        // Optional underscore
+        if (this->peek(tokens).tt == TokenType::Underscore)
+            this->eat(tokens);
+        // Optional braces
+        bool needs_braces = this->peek(tokens).tt == TokenType::LBrace;
+        if (needs_braces) this->eat(tokens);
+        // Any number of attributes
+        std::vector<ProjectionAttr> attrs = {};
+        while (true) {
+            // Expression
+            Node expr = this->parse_tl_expr(tokens);
+            ERR(expr);
+            std::string name = "";
+            if (this->peek(tokens).tt == TokenType::ElmProject) {
+                // Explicit projection name
+                this->eat(tokens);
+                if (this->peek(tokens).tt != TokenType::Literal) {
+                    error("Expected literal for projection name", this->peek(tokens));
+                    return nullptr;
+                }
+                name = this->eat(tokens).data;
+            } else if (expr->type == ASTNodeType::LiteralExpr) {
+                // Implicit projection name
+                name = ((BaseLitExprNode *) expr.get())->str;
+            } else {
+                error("Expected either explicit (*->A) or implicit (A) projection name", this->peek(tokens));
+                return nullptr;
+            }
+            // Add
+            attrs.push_back(ProjectionAttr{MOVE(expr), name});
+            // Exit or continue
+            if (this->peek(tokens).tt == TokenType::Comma) {
+                this->eat(tokens);
+            } else {
+                break;
+            }
+        }
+        // Optional braces
+        if (needs_braces) {
+            if (this->peek(tokens).tt == TokenType::RBrace) {
+                this->eat(tokens);
+            } else {
+                error("Expected '}' to end projection", this->peek(tokens));
+                return nullptr;
+            }
+        }
+        // Table
+        Node table = this->parse_table_expr(tokens);
+        ERR(table);
+        // Selection
+        return NODE<ProjectionTableNode>(MOVE(table), MOVE(attrs));
     } else if (at.tt == TokenType::Literal) {
         return NODE<BaseLitExprNode>(this->eat(tokens).data);
     }
