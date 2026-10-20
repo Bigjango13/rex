@@ -29,6 +29,7 @@ public:
     bool eval_expr(Table *target, Record &val, ASTNode *node);
 
     bool run_select(SelectTableNode *node);
+    bool run_project(ProjectionTableNode *node);
     bool run_lit(BaseLitExprNode *node);
     bool run_node(ASTNode *node, bool tl = false);
 

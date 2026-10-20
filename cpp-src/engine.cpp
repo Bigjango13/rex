@@ -100,12 +100,45 @@ bool Engine::eval_expr(Table *target, Record &val, ASTNode *node) {
     return false;
 }
 
+bool Engine::run_project(ProjectionTableNode *node) {
+    // Get the table
+    ERR(run_node(node->table.get()));
+    Table *target = anon;
+    if (target == NULL) {
+        return error("Got NULL table for project! This should never happen!");
+    }
+    // Add the columns
+    Table *tb = new Table("");
+    for (auto &attr : node->attributes) {
+        tb->addCol(attr.name);
+    }
+    // Add the rows
+    for (int i = 0; i < (int) target->columns[0].records.size(); i++) {
+        this->tb_index = i;
+        std::vector<Record> row = {};
+        for (auto &attr : node->attributes) {
+            Record other(false);
+            if (!eval_expr(target, other, attr.expr.get())) {
+                delete(tb);
+                free_anon();
+                return false;
+            }
+            row.push_back(other);
+        }
+        tb->addRow(row);
+    }
+    // Return
+    free_anon();
+    anon = tb;
+    return true;
+}
+
 bool Engine::run_select(SelectTableNode *node) {
     // Get the table
     ERR(run_node(node->table.get()));
     Table *target = anon;
     if (target == NULL) {
-        return error("Got NULL table for binop! This should never happen!");
+        return error("Got NULL table for select! This should never happen!");
     }
 
     // Test the condition each time
@@ -151,6 +184,8 @@ bool Engine::run_node(ASTNode *node, bool tl) {
 
     if (node->type == ASTNodeType::SelectTable) {
         ERR(run_select((SelectTableNode *) node));
+    } else if (node->type == ASTNodeType::ProjectTable) {
+        ERR(run_project((ProjectionTableNode *) node));
     } else if (node->type == ASTNodeType::LiteralExpr) {
         ERR(run_lit((BaseLitExprNode *) node));
     } else {

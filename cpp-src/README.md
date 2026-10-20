@@ -2,6 +2,12 @@
 
 This is the C++ backend
 
+## Examples
+
+- Selection: `select_{Name="Kate"} Test`
+- Projection: `project_{Name,2026-Year->Age} Test`
+- Combinations: `project_{Name,2026-Year->Age} select_{Name="Kate"} Test`
+
 ## Build modes
 
 Currently there are two build modes, local and website.
@@ -158,4 +164,3 @@ When called from main `tl = true`, otherwise `tl = false`.
 The data structure that stores a single table
 
 Each `Table` has a number of `Rows`, which have a number of `Records`.
- 
