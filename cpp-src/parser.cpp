@@ -259,7 +259,7 @@ Node Parser::parse_table_expr(Tokens tokens) {
     } else if (at.tt == TokenType::Literal) {
         return NODE<BaseLitExprNode>(this->eat(tokens).data);
     }
-    error("Unknown table operation", this->peek(tokens));
+    error("Expected table", this->peek(tokens));
     return nullptr;
 }
 

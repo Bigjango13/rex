@@ -5,8 +5,8 @@ This is the C++ backend
 ## Examples
 
 - Selection: `select_{Name="Kate"} Test`
-- Projection: `project_{Name,2026-Year->Age} Test`
-- Combinations: `project_{Name,2026-Year->Age} select_{Name="Kate"} Test`
+- Projection: `project_{Name+" "+Last Name->Full Name,2026-Year->Year} Test`
+- Combinations: `project_{Name+" "+Last Name->Full Name,2026-Year->Year} select_{Name="Kate"} Test`
 
 ## Build modes
 

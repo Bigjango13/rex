@@ -65,7 +65,7 @@ bool Engine::eval_binop_expr(Table *target, Record &val, BinopNode *node) {
             }
             return true;
 
-        // Short circuting behavior is handled earlier
+        // Short circuiting behavior is handled earlier
         case BinopType::And:
         case BinopType::Or:
             val = other;
