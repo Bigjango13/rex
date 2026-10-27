@@ -11,17 +11,23 @@ static void report_error(const std::string &line, size_t offset, size_t len) {
 
 #ifndef WEBSITE
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        std::cout << "Usage: " << argv[0] << " TableName input.csv" << std::endl;
+    if (argc < 3 || ((argc-1)&1) == 1) {
+        std::cout << "Usage: " << argv[0] << " TableName input.csv [<TableName2> <input2.csv>]+" << std::endl;
         return 1;
     }
 
-    std::ifstream input;
-    input.open(argv[2]);
-    Table *tb = new Table(argv[1]);
-    tb->addFromCSV(input);
     Engine engine;
-    engine.tables[tb->name] = tb;
+    for (int n = 1; n + 1 < argc; n += 2) {
+        std::ifstream input;
+        input.open(argv[n + 1]);
+        if (!input.good()) {
+            std::cout << "Failed to open file: " << argv[n + 1] << std::endl;
+            return 1;
+        }
+        Table *tb = new Table(argv[n]);
+        tb->addFromCSV(input);
+        engine.tables[tb->name] = tb;
+    }
 
     std::string line = "";
     while (1) {

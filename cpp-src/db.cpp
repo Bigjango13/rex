@@ -75,23 +75,30 @@ void Table::print() {
     if (this->name != "") {
         std::cout << "Table: " << this->name << std::endl;
     }
-    // Print headers
+    std::string border = "";
     for (auto &col : columns) {
         col.update_max_align();
-        std::cout << std::left << std::setw(col.max_align + 2);
+        border += "+" + std::string(col.max_align + 2, '-');
+    }
+    border += "+";
+    std::cout << border << std::endl;
+    // Print headers
+    for (auto &col : columns) {
+        std::cout << "| " << std::left << std::setw(col.max_align + 1);
         std::cout << col.name;
     }
-    std::cout << std::endl;
+    std::cout << "|" << std::endl;
     if (columns.size() == 0) return;
     // Print the data
     size_t size = columns[0].records.size();
     for (size_t i = 0; i < size; i++) {
         for (auto &col : columns) {
-            std::cout << std::left << std::setw(col.max_align + 2);
+            std::cout << "| " << std::left << std::setw(col.max_align + 1);
             std::cout << col.records[i].getStringValue();
        }
-       std::cout << std::endl;
+       std::cout << "|" << std::endl;
     }
+    std::cout << border << std::endl;
 }
 
 // Column
