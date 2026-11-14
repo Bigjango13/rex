@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
         Table *tb = new Table(argv[n]);
-        tb->addFromCSV(input);
+        tb->addFromCSV(&input);
         engine.tables[tb->name] = tb;
     }
 
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
         line = "";
         while (line == "") {
             std::cout << "> ";
-            if (!getline(std::cin, line)) {
+            if (!std::getline(std::cin, line)) {
                 // Ctrl-D / EOL
                 std::cout << std::endl;
                 line = "exit";

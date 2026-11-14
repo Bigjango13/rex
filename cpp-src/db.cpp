@@ -72,11 +72,11 @@ static std::string getSingleCell(const std::string &line, size_t &at, char delim
 }
 
 // TODO: Error checking?
-void Table::addFromCSV(std::istream &stream) {
+void Table::addFromCSV(std::istream *stream) {
     // Headers
     std::string line;
     char delim = ',';
-    getline(stream, line);
+    std::getline(*stream, line);
     std::stringstream ss(line);
     // Test for delim
     if (line.find(",") == std::string::npos) {
@@ -95,7 +95,7 @@ void Table::addFromCSV(std::istream &stream) {
     }
 
     // Values
-    while (std::getline(stream, line)) {
+    while (std::getline(*stream, line)) {
         std::stringstream ss(line);
         size_t at = 0, i = 0;
         while (at < line.size()) {
@@ -106,6 +106,11 @@ void Table::addFromCSV(std::istream &stream) {
             columns[i++].records.push_back(Record(getSingleCell(line, at, delim)));
         }
     }
+}
+
+void Table::addFromCSVString(const std::string &str) {
+    std::istringstream s = std::istringstream(str);
+    this->addFromCSV(&s);
 }
 
 void Table::print() {
@@ -186,7 +191,7 @@ Record::Record(bool val) : sdata(""), bval(val), type('b') {
 // TODO: Where do we handle type errors?
 // Do we even handle type errors or do
 // some gross JS-like type coercion?
-double Record::getDoubleValue() {
+double Record::getDoubleValue() const {
     if (type == 'f') return fdata;
     return 0;
 }
@@ -196,7 +201,7 @@ void Record::setDoubleValue(double val) {
     fdata = val;
 }
 
-std::string Record::getStringValue() {
+std::string Record::getStringValue() const {
     if (type == 's') return sdata;
     if (type == 'b') return bval ? "true" : "false";
     // Convert the double to a string
@@ -208,7 +213,7 @@ void Record::setStringValue(std::string val) {
     sdata = val;
 }
 
-bool Record::getBooleanValue() {
+bool Record::getBooleanValue() const {
     if (type == 's') return sdata == "";
     if (type == 'f') return fdata != 0.0;
     return bval;
